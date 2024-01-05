@@ -1,0 +1,577 @@
+
+=========================
+REST API & Microservices
+=========================
+
+1) What is distributed application
+
+2) Why we need to go for distributed applications
+
+3) Distributed Technologies
+
+4) Provider Development
+
+5) Testing Using Postman
+
+6) Swagger 
+
+7) Consumer Development
+
+8) Exception Handling
+
+9) Microservices
+
+10) Service Registry
+
+11) Admin Server
+
+12) Zipkin Server
+
+13) API Gateway
+
+14) Ribbon for lbr
+
+15) FeignClient
+
+16) Circuit Breaker
+
+17) Kafka
+
+18) Redis
+
+19) Config Server
+
+20) Security
+
+
+======================
+Types of applications
+======================
+
+
+1) Standalone-app (only one user can access at a time)
+
+2) Web app (Multiple users can access at a time)
+
+3) Distributed app  (webservices)
+
+
+===================================
+What is Distributed application ?
+===================================
+
+=> If one application is communicating with another application then it is called as Distributed application.
+
+			Ex:
+
+				passport <-----------> aadhar
+
+				makemytrip <---------> irctc
+
+				gpay <-----------> banking
+
+
+==========================================
+Why to develop distributed applications ?
+==========================================
+
+=> For code re-usability
+
+=> For loosely coupling
+
+======================================
+Distributed Application Architecture
+======================================
+
+=> In Ditributed applications, 2 actors will be available
+
+1) Provider  : The app which is giving services to other application
+
+		ex: IRCTC
+
+2) Consumer : The app which is accessing services from other application
+
+		ex: MakeMyTrip, Yatra ..
+
+===========================
+What is Intereoperability	
+===========================	
+
+-> Not language specific
+
+-> Not platform specific
+
+-> Irrespective of platform and language if two apps are communicating then those are called as intereoperable applications.
+
+			java ----> .net
+
+			java ----> python
+
+			java ----> Node js
+
+
+Note: To achieve intereoperability we will use xml/json format to transfer data from one application to another application.
+
+=> XML & JSON formats are univeral, all languages will understand these formats.
+
+==========================
+Distributed Technologies
+==========================
+
+1) CORBA
+
+2) RMI
+
+3) EJB
+
+4) SOAP Webservices (Outdated)
+
+		- JAX-RPC
+		- JAX-WS
+
+5) RESTFul Services (Trending)
+
+		- JAX-RS (outdated)
+		- Spring REST  (trending)
+
+
+======
+JSON
+======
+
+=> Java Script Object Notation
+
+=> In Distributed applications we will use JSON as a mediator between Consumer & Provider.
+
+=> JSON is intereoperable
+
+=> JSON is very light weight
+
+=> JSON will represent data in key-value format.
+
+Syntax:
+
+{
+	
+	"id" : 101,
+	"name" : "ashok",
+	"gender" : "male"
+
+}
+
+
+=> To convert java object to json data and json data to java object we will use "Jackson" API.
+
+=> Jackson is a third party library.
+
+=> Jackson api provided "ObjectMapper" class to perform conversions
+
+				
+							jackson api
+			java obj <---------------------> json data
+
+
+			ObjectMapper mapper = new ObjectMapper ( );
+
+			writeValue(object); // convert java obj to json
+
+			readValue(String file);// convert json to java obj
+
+
+
+=============================
+Java with Jackson API Example
+==============================
+
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.16.1</version>
+		</dependency>
+
+--------------------------------------------------------------------------------
+
+public class Customer {
+
+	private Integer cid;
+	private String cname;
+	private String cemail;
+
+	// setters & getters
+}
+-------------------------------------------------------------------------
+
+public class ConvertObjToJson {
+
+	public static void main(String[] args) throws Exception {
+		
+		// Convert obj to json format
+		Customer c = new Customer(101, "John", "john@gmail.com");
+
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.writeValue(new File("customer.json"), c);
+
+		System.out.println("completed....");
+	}
+}
+
+-------------------------------------------------------------------------------------
+
+public class ConvertJsonToObj {
+	
+	public static void main(String[] args) throws Exception{
+		
+		// json conversion to java obj
+		
+		File f = new File("customer.json");
+		ObjectMapper mapper = new ObjectMapper();
+		Customer customer = mapper.readValue(f, Customer.class);
+		System.out.println(customer);
+		
+	}
+}
+
+========================================
+REST API development using Spring Boot
+========================================
+
+-> We need to use "web-starter" dependency in pom.xml
+
+-> As part of REST API (Provider) development we will use below annotations
+
+
+1) @RestController   : To make our class as distributed component (B2B)
+
+2) @RequestParam : To read query parameters from URL (K-V)
+
+3) @PathVariable : To read path parameters
+
+4) @RequestBody : To read data from request body
+
+5) @GetMapping : To map rest controller method to HTTP GET request
+
+6) @PostMapping : To map rest controller method to HTTP POST request
+
+7) @PutMapping : To map rest controller method to HTTP PUT request
+
+8) @DeleteMapping : To map rest controller method to HTTP DELETE request
+
+-------------------------------------------------------------------
+
+@RestController
+public class MsgRestController {
+
+	@GetMapping("/welcome")
+	public String getWelcomeMsg() {
+		String msg = "Welcome to REST API..!!";
+		return msg;
+	}
+
+	@GetMapping("/greet")
+	public String getGreetMsg(@RequestParam("name") String name) {
+		String msg = name + ", Good Morning..!!";
+		return msg;
+	}
+
+}
+
+-------------------------------------------------------------
+
+=> HTTP will act as mediator between consumer and provider
+
+==============
+HTTP Methods
+================
+
+1) GET : Method is responsible to send data to consumer
+
+2) POST : Method is responsible to create a resource/record
+
+3) PUT : Method is responsible to update a record
+
+4) DELETE : Method is responsible to delete a record
+
+Note:  Rest Controller class methods will be mapped to HTTP methods
+
+Note: GET method will not have request body.
+
+=> POST, PUT and DELETE methods will have request body.
+
+=> Request Body is used to send payload from consumer to provider in the form xml or json.
+
+=> Response Body is used to send payload from Provider to consumer.
+
+
+Ex:
+
+1) MakeMyTrip will send passenger data to IRCTC in request body 
+   (xml/json)
+
+2) IRCTC will send ticket data to MakeMyTrip in response body 
+   (xml/json)   
+
+===================
+HTTP Status Codes
+===================
+
+=> Provider will send response to consumer using HTTP Status code.
+
+
+2xx (200 - 299) : Success (OK)
+
+4xx (400 - 499) : Client Error
+
+5xx (500 - 599) : Server Error
+
+
+-------------------------------------------------
+
+@RestController
+public class MsgRestController {
+	
+	@GetMapping("/greet")
+	public String getGreetMsg(@RequestParam("name") String name) {
+		String msg = name+", Good Morning..!!";
+		return msg;
+	}
+
+	@GetMapping("/welcome/{name}")
+	public ResponseEntity<String> getWelcomeMsg(@PathVariable("name") String name) {
+		String msg = name+", Welcome to REST API..!!";
+		return new ResponseEntity<>(msg, HttpStatus.OK);
+	}
+	
+	@GetMapping("/action")
+	public ResponseEntity<Void> doAction() {
+		System.out.println("doAction () metdod called...");
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+}
+
+
+=============================
+REST API with JSON Response
+=============================
+
+
+1) Create springboot app with web-starter
+
+2) Create Binding class to represent data
+
+-----------------------------------------------------------------------
+public class Customer {
+
+	private Integer cid;
+	private String cname;
+	private String cemail;
+
+}
+
+-------------------------------------------------------------------------
+
+3) Create Rest Controller with Required methods
+
+		Ex: GET, POST, PUT and DELETE
+
+-----------------------------------------------------------------------
+@RestController
+public class CustomerRestController {
+
+	@DeleteMapping(value = "/customer/{cid}", produces = "text/plain")
+	public String deleteCustomer(@PathVariable Integer cid) {
+		// db logic to delete
+		return "Customer Deleted";
+	}
+
+	@PutMapping(value = "/customer", consumes = "application/json", produces = "text/plain")
+	public String updateCustomer(@RequestBody Customer c) {
+		System.out.println(c);
+		// TODO: DB logic to update the record
+		return "Customer Updated";
+	}
+
+	@PostMapping(value = "/customer", produces = "text/plain", consumes = "application/json")
+	public ResponseEntity<String> addCustomer(@RequestBody Customer c) {
+		System.out.println(c);
+		// TODO: DB logic to insert record
+		String body = "Customer Added";
+		return new ResponseEntity<>(body, HttpStatus.CREATED);
+	}
+
+	@GetMapping(value = "/customer", produces = "application/json")
+	public Customer getCustomer() {
+		// logic to get record from db
+		Customer c = new Customer(1, "john", "john@gmail.com");
+		return c;
+	}
+
+	@GetMapping(value = "/customers", produces = "application/json")
+	public List<Customer> getCustomers() {
+		// logic to get records from db
+		Customer c1 = new Customer(1, "john", "john@gmail.com");
+		Customer c2 = new Customer(2, "smith", "smith@gmail.com");
+		Customer c3 = new Customer(3, "david", "david@gmail.com");
+		List<Customer> customers = Arrays.asList(c1, c2, c3);
+		return customers;
+	}
+
+}
+------------------------------------------------------------------------
+
+consumes : It represents in which format our rest api method can take input data from request body
+
+	ex: consumes  = "application/json"
+
+produces : It represents in which format our rest api method can provide response to consumer in response body.	
+
+----------------------------------------------------------------
+
+Assignment-1 : Develop REST API to perform CRUD operations with H2 DB and test it using POSTMAN.
+
+Reference : https://youtu.be/_rOUDhCE-x4?si=QQqNl9kS3WUrgI2t
+
+----------------------------------------------------------------
+
+=========
+Swagger
+=========
+
+=> It is used to generate documentation for REST API.
+
+=> Provider app dev team should provide swagger documentation to consumer app dev team.
+
+=> Swagger documentation will show provider information 
+
+			1) Where is provider (URL)
+			2) How is provider (what operations available)
+			3) Input format
+			4) Output format...
+
+Note: Using Swagger, we can test provider functionality also.			
+
+=> Consumer app team will understand provider details using swagger documentation.
+
+==========================
+Spring Boot 3.x + Swagger
+===========================
+
+=> Add below dependency in pom.xml file
+
+<dependency>
+			<groupId>org.springdoc</groupId>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>2.1.0</version>
+</dependency>
+
+=> Run the application and access swagger-ui page with below url
+
+		URL : http://localhost:8080/swagger-ui.html
+
+
+-----------------------------------------------------------------
+
+1) What is Distributed application
+2) Why to go for Distributed applications
+3) Distributed Technologies
+4) REST API Architecture 
+5) What is Intereoperability
+6) What is JSON 
+7) What is Jackson
+8) HTTP Protocol (methods & status codes)
+9) Rest Controller
+10) REST API methods
+11) Request Param
+12) Path Variable
+13) @RequestBody
+14) Consumes & Produces
+15) Postman
+16) Swagger
+
+
+=============================
+IRCTC REST API development
+=================-===========
+
+=> Develop IRCTC api to book train tickets for passengers
+
+=> We need to have below 2 functionalities in IRCTC API
+
+1) book-ticket   (POST Request method)
+
+		input : passenger data
+		output : ticket data
+
+2) get all tickets (GET request method)
+
+		input : N/A
+		outupt : all tickets data
+
+
+### Step-1 ) Identify request structure and create req binding class
+
+Request : passenger info
+
+name
+email
+doj
+from
+to
+trainNum
+
+### Step-2 ) Identify response structure and create resp binding class
+
+Response : Ticket info
+
+ticket-num
+name
+doj
+from
+to
+trainNum
+status
+
+
+### Step-3 ) Creae Boot application with required classes
+
+1) Passenger.java
+2) Ticket.java
+3) TicketService.java
+4) TicketServiceImpl.java
+5) TicketRestController.java
+
+
+### Step-4) Run the application and test it using swagger ui
+
+
+
+======================================
+Deploying Provider API in AWS cloud
+======================================
+
+## Reference Video : https://youtu.be/cRQPgbwOWq0?si=9b0Yuye0iFPoUB1W
+
+1) Login into aws cloud account
+
+2) Create Linux VM in aws cloud using EC2 service
+
+3) Connect with Linux VM using MobaXterm
+
+4) Upload our api jar file
+
+5) Install java in linux vm
+
+	$ sudo yum install java
+
+6) Run jar file
+
+		nohup java -jar <jarfile>	&
+
+7) Access our application documentation like below
+
+		URL : http://public-ip:8080/swagger-ui/index.html
+
+
+----------------------------------------------------------------
+Provider URL : http://43.205.144.253:8080/swagger-ui/index.html
+----------------------------------------------------------------
